@@ -19,7 +19,6 @@ def parse_line(line):
 def get_time_ms(entry):
     return entry["time_ms"]
 
-
 def get_count(item):
     return item[1]
 
@@ -75,3 +74,17 @@ for entry in errors_500:
 print("\nОшибки 500 по минутам (по убыванию):")
 for minute, count in sorted(errors_by_minute.items(), key=get_count, reverse=True):
     print(f"  {minute}: {count}")
+
+# 6. Поиск запроса по request_id
+search_id = input("\nВведите request_id (например, req-0042): ").strip()
+
+found = None
+for entry in entries:
+    if entry["request_id"] == search_id:
+        found = entry
+
+if found is None:
+    print("Запрос не найден")
+else:
+    for key, value in found.items():
+        print(f"  {key}: {value}")
