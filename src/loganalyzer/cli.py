@@ -1,73 +1,22 @@
+"""Точка входа: запускает анализ лога и печатает результаты."""
+
 from pathlib import Path
 
-LOG_FILE = Path(__file__).resolve().parent.parent / "data" / "sample_access.log"
+from loganalyzer.log_analyzer import (
+    count_by_field,
+    count_by_minute,
+    filter_by_status,
+    find_by_request_id,
+    get_count,
+    load_entries,
+    slowest_requests,
+)
 
-
-def parse_line(line): #парсинг лог-файла
-    parts = line.split()
-    return {
-        "date": parts[0],
-        "time": parts[1],
-        "method": parts[2],
-        "path": parts[3],
-        "status": int(parts[4]),
-        "time_ms": int(parts[5].replace("ms", "")),
-        "request_id": parts[6],
-    }
-
-
-def load_entries(path):
-    entries = []
-    with open(path, encoding="utf-8") as f:
-        for line in f:
-            entries.append(parse_line(line))
-    return entries
-
-
-def count_by_field(entries, field):
-    counts = {}
-    for entry in entries:
-        value = entry[field]
-        counts[value] = counts.get(value, 0) + 1
-    return counts
-
-
-def get_time_ms(entry):
-    return entry["time_ms"]
-
-
-def get_count(item):
-    return item[1]
-
-
-def slowest_requests(entries, limit=5):
-    return sorted(entries, key=get_time_ms, reverse=True)[:limit]
-
-
-def filter_by_status(entries, status):
-    result = []
-    for entry in entries:
-        if entry["status"] == status:
-            result.append(entry)
-    return result
-
-
-def count_by_minute(entries):
-    counts = {}
-    for entry in entries:
-        minute = entry["time"][:5]
-        counts[minute] = counts.get(minute, 0) + 1
-    return counts
-
-
-def find_by_request_id(entries, request_id):
-    for entry in entries:
-        if entry["request_id"] == request_id:
-            return entry
-    return None
+LOG_FILE = Path(__file__).resolve().parent.parent.parent / "data" / "sample_access.log"
 
 
 def main():
+    """Запускает анализ и печатает результаты."""
     entries = load_entries(LOG_FILE)
 
     print("Количество ответов по кодам:")
