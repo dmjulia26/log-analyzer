@@ -41,7 +41,7 @@ def get_count(item):
 
 def slowest_requests(entries, limit=5):
     """Возвращает limit самых медленных запросов."""
-    return sorted(entries, key=get_time_ms)[:limit]
+    return sorted(entries, key=get_time_ms,reverse=True)[:limit]
 
 
 def filter_by_status(entries, status):
