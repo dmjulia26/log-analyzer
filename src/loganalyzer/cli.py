@@ -12,6 +12,7 @@ from loganalyzer.log_analyzer import (
     load_entries,
     slowest_requests,
 )
+from loganalyzer.report import build_report
 from loganalyzer.storage import (
     avg_time_by_path,
     create_connection,
@@ -19,9 +20,10 @@ from loganalyzer.storage import (
     save_entries,
 )
 
-# Лог и база по умолчанию лежат в папке data в корне проекта
+# Лог, база и отчёт лежат в папке data в корне проекта
 DEFAULT_LOG = Path(__file__).resolve().parent.parent.parent / "data" / "sample_access.log"
 DEFAULT_DB = Path(__file__).resolve().parent.parent.parent / "data" / "logs.db"
+DEFAULT_REPORT = Path(__file__).resolve().parent.parent.parent / "data" / "report.md"
 
 
 def parse_args():
@@ -53,6 +55,11 @@ def parse_args():
         "--sql",
         action="store_true",
         help="сохранить записи в SQLite и показать SQL-отчёт",
+    )
+    parser.add_argument(
+        "--report",
+        action="store_true",
+        help="сохранить markdown-отчёт в data/report.md",
     )
     return parser.parse_args()
 
@@ -103,7 +110,23 @@ def main():
         conn.close()
         return
 
-    # Режим отчёта
+    # Режим отчёта в файл: собираем markdown и сохраняем
+    if args.report:
+        conn = create_connection(DEFAULT_DB)
+        save_entries(conn, entries)
+        report = build_report(
+            entries,
+            count_by_field(entries, "status"),
+            slowest_requests(entries, args.top),
+            errors_by_path(conn),
+            count_by_minute(filter_by_status(entries, 500)),
+        )
+        conn.close()
+        DEFAULT_REPORT.write_text(report, encoding="utf-8")
+        print(f"Отчёт сохранён: {DEFAULT_REPORT}")
+        return
+
+    # Режим отчёта в консоль
     print("Количество ответов по кодам:")
     for status, count in sorted(count_by_field(entries, "status").items()):
         print(f"  {status}: {count}")
