@@ -28,8 +28,8 @@ Python 3, `argparse`, `sqlite3`, `pytest`, Git.
 ## Установка
 
 ```
-git clone <ссылка на репозиторий>
-cd <папка проекта>
+git clone https://github.com/dmjulia26/log-analyzer.git
+cd log-analyzer
 python -m venv .venv
 .venv\Scripts\activate
 pip install pytest
